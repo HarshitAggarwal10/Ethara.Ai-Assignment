@@ -1,8 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
 export default function ProjectList({ projects, onUpdate }) {
-  const handleDelete = async (projectId) => {
+  const navigate = useNavigate();
+
+  const handleDelete = async (projectId, e) => {
+    e.stopPropagation();
     if (confirm('Are you sure?')) {
       try {
         await api.delete(`/api/projects/${projectId}`);
@@ -24,14 +28,18 @@ export default function ProjectList({ projects, onUpdate }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
-        <div key={project.id} className="bg-white rounded-lg shadow p-6">
+        <div
+          key={project.id}
+          onClick={() => navigate(`/projects/${project.id}`)}
+          className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+        >
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
               <p className="text-gray-600 text-sm mt-1">{project.description}</p>
             </div>
             <button
-              onClick={() => handleDelete(project.id)}
+              onClick={(e) => handleDelete(project.id, e)}
               className="text-red-600 hover:text-red-800 text-sm ml-2"
             >
               Delete
