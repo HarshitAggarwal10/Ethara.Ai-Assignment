@@ -1,7 +1,23 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from enum import Enum
 
 db = SQLAlchemy()
+
+class UserRole(Enum):
+    ADMIN = 'admin'
+    MEMBER = 'member'
+
+class TaskStatus(Enum):
+    PENDING = 'pending'
+    IN_PROGRESS = 'in-progress'
+    COMPLETED = 'completed'
+    OVERDUE = 'overdue'
+
+class TaskPriority(Enum):
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -16,6 +32,15 @@ class User(db.Model):
     projects = db.relationship('Project', secondary='project_members', backref='members')
     tasks = db.relationship('Task', backref='assignee', foreign_keys='Task.assigned_user_id')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'role': self.role,
+            'created_at': self.created_at.isoformat()
+        }
+
 class Project(db.Model):
     __tablename__ = 'projects'
     
@@ -28,6 +53,17 @@ class Project(db.Model):
     
     owner = db.relationship('User', backref='owned_projects')
     tasks = db.relationship('Task', backref='project', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'owner_id': self.owner_id,
+            'team_members': len(self.members),
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
 
 project_members = db.Table(
     'project_members',
@@ -48,3 +84,18 @@ class Task(db.Model):
     due_date = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'project_id': self.project_id,
+            'assigned_to': self.assignee.name if self.assignee else 'Unassigned',
+            'status': self.status,
+            'priority': self.priority,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
