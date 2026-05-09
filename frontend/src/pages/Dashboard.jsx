@@ -4,6 +4,8 @@ import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import ProjectList from '../components/ProjectList';
 import TaskList from '../components/TaskList';
+import ProjectModal from '../components/ProjectModal';
+import TaskModal from '../components/TaskModal';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('tasks');
@@ -108,6 +110,17 @@ export default function Dashboard() {
           {activeTab === 'projects' && <ProjectList projects={projects} onUpdate={fetchData} />}
         </div>
       </div>
+
+      <ProjectModal 
+        isOpen={showProjectModal} 
+        onClose={() => setShowProjectModal(false)}
+        onProjectCreated={handleProjectCreated}
+      />
+      <TaskModal 
+        isOpen={showTaskModal} 
+        onClose={() => setShowTaskModal(false)}
+        onTaskCreated={handleTaskCreated}
+      />
     </div>
   );
 }
