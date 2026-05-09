@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import ProjectList from '../components/ProjectList';
-import TaskList from '../components/TaskList';
+import TaskFilter from '../components/TaskFilter';
+import DashboardStats from '../components/DashboardStats';
 import ProjectModal from '../components/ProjectModal';
 import TaskModal from '../components/TaskModal';
 
@@ -63,8 +64,8 @@ export default function Dashboard() {
       <Navbar />
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
             <div className="space-x-4">
               <button
                 onClick={() => setShowProjectModal(true)}
@@ -80,6 +81,8 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
+
+          <DashboardStats tasks={tasks} projects={projects} />
 
           <div className="border-b border-gray-200 mb-6">
             <nav className="flex space-x-8" aria-label="Tabs">
@@ -106,7 +109,7 @@ export default function Dashboard() {
             </nav>
           </div>
 
-          {activeTab === 'tasks' && <TaskList tasks={tasks} onUpdate={fetchData} />}
+          {activeTab === 'tasks' && <TaskFilter tasks={tasks} onUpdate={fetchData} />}
           {activeTab === 'projects' && <ProjectList projects={projects} onUpdate={fetchData} />}
         </div>
       </div>
