@@ -76,6 +76,15 @@ export default function AdminAuth() {
         {error && <div className="form-error" style={{marginBottom:'1rem'}}>{error}</div>}
         {success && <div className="form-success" style={{marginBottom:'1rem'}}>{success}</div>}
 
+        {isLogin && (
+          <div style={{ background: 'rgba(99,102,241,0.15)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.25rem', border: '1px solid rgba(99,102,241,0.3)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.85rem', color: '#a5b4fc', margin: 0 }}>
+              <strong>Demo Admin:</strong> admin@test.com<br/>
+              <strong>Password:</strong> adminpass
+            </p>
+          </div>
+        )}
+
         {isLogin ? (
           <form onSubmit={handleLogin} className="auth-form">
             <div className="form-group">

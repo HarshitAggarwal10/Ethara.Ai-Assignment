@@ -27,6 +27,23 @@ def create_app():
     
     with app.app_context():
         db.create_all()
+        
+        # Auto-create default admin for deployment testing
+        from models import User
+        from werkzeug.security import generate_password_hash
+        if not User.query.filter_by(email='admin@test.com').first():
+            default_admin = User(
+                name='Admin User',
+                email='admin@test.com',
+                password=generate_password_hash('adminpass'),
+                role='admin',
+                status='active',
+                is_admin_approved=True,
+                department='Administration'
+            )
+            db.session.add(default_admin)
+            db.session.commit()
+            print("Default admin created automatically!")
     
     return app
 
