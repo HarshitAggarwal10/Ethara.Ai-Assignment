@@ -52,7 +52,12 @@ export default function Login() {
           <button type="submit" className="btn-auth" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</button>
         </form>
         <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          <div style={{ marginBottom: '1rem' }}>
+            Don't have an account? <Link to="/signup">Sign up</Link>
+          </div>
+          <Link to="/" style={{ color: '#64748b', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            ← Back to Home
+          </Link>
         </div>
       </div>
     </div>

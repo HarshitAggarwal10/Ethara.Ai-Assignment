@@ -115,8 +115,11 @@ export default function AdminAuth() {
           </form>
         )}
 
-        <div className="auth-footer">
+        <div className="auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
           <Link to="/login">← Back to regular login</Link>
+          <Link to="/" style={{ color: '#64748b', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            ← Back to Home
+          </Link>
         </div>
       </div>
     </div>

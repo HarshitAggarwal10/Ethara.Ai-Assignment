@@ -76,7 +76,12 @@ export default function Signup() {
           <button type="submit" className="btn-auth" disabled={loading}>{loading ? 'Creating account...' : 'Create Account'}</button>
         </form>
         <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign in</Link>
+          <div style={{ marginBottom: '1rem' }}>
+            Already have an account? <Link to="/login">Sign in</Link>
+          </div>
+          <Link to="/" style={{ color: '#64748b', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            ← Back to Home
+          </Link>
         </div>
       </div>
     </div>
