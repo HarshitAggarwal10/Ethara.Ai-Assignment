@@ -32,7 +32,9 @@ export default function ProjectManagementAdmin() {
       await api.delete(`/api/admin/projects/${id}`);
       setProjects(prev => prev.filter(p => p.id !== id));
       setSuccess('Project deleted'); setTimeout(() => setSuccess(''), 3000);
-    } catch { setError('Failed to delete project'); }
+    } catch (err) { 
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to delete project'); 
+    }
   };
 
   if (loading) return <div className="loading-page" style={{minHeight:'200px'}}><div className="spinner" /></div>;

@@ -35,7 +35,9 @@ export default function TaskManagementAdmin() {
       await api.delete(`/api/tasks/${id}`);
       setTasks(prev => prev.filter(t => t.id !== id));
       setSuccess('Task deleted'); setTimeout(() => setSuccess(''), 3000);
-    } catch { setError('Failed to delete task'); }
+    } catch (err) { 
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to delete task'); 
+    }
   };
 
   const getStatusBadge = (s) => {
