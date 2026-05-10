@@ -1,83 +1,71 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
 
-  if (token) {
-    navigate('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (localStorage.getItem('token')) navigate('/dashboard');
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600">Task Manager</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/login')}
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => navigate('/signup')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Get Started
-              </button>
-            </div>
-          </div>
+    <div className="page" style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+      {/* Nav */}
+      <nav className="navbar">
+        <div className="navbar-brand">⚡ TaskFlow</div>
+        <div className="navbar-links">
+          <button className="nav-link" onClick={() => navigate('/login')}>Sign In</button>
+          <button className="nav-link" onClick={() => navigate('/admin-auth')}>🛡️ Admin</button>
+          <button className="btn-primary btn-sm" onClick={() => navigate('/signup')}>Get Started</button>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Team Task Manager
+      {/* Hero */}
+      <div className="container" style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'center',paddingTop:'3rem',paddingBottom:'3rem'}}>
+        <div style={{textAlign:'center',marginBottom:'4rem'}}>
+          <div style={{fontSize:'4rem',marginBottom:'1rem'}}>⚡</div>
+          <h1 style={{fontSize:'3rem',fontWeight:800,lineHeight:1.1,marginBottom:'1rem'}}>
+            <span style={{background:'linear-gradient(135deg,#6366f1,#8b5cf6,#a78bfa)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>
+              Team Task Manager
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p style={{fontSize:'1.15rem',color:'#94a3b8',maxWidth:'600px',margin:'0 auto 2rem',lineHeight:1.6}}>
             Organize, collaborate, and track your projects with ease. Built for teams that want to get things done.
           </p>
-          <div className="space-x-4">
-            <button
-              onClick={() => navigate('/signup')}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Start Free Trial
+          <div style={{display:'flex',gap:'1rem',justifyContent:'center',flexWrap:'wrap'}}>
+            <button className="btn-primary" style={{padding:'0.85rem 2rem',fontSize:'1rem'}} onClick={() => navigate('/signup')}>
+              Start Free →
             </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
+            <button className="btn-secondary" style={{padding:'0.85rem 2rem',fontSize:'1rem'}} onClick={() => navigate('/login')}>
               Sign In
             </button>
           </div>
         </div>
 
-        <div className="mt-24 grid gap-8 md:grid-cols-3">
-          <div className="bg-white rounded-lg shadow p-8">
-            <div className="text-3xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Dashboard</h3>
-            <p className="text-gray-600">View all your tasks and projects in one place with real-time statistics.</p>
-          </div>
+        {/* Features */}
+        <div className="grid-3" style={{marginBottom:'3rem'}}>
+          {[
+            { icon: '📊', title: 'Dashboard', desc: 'View all tasks and projects in one place with real-time statistics and progress tracking.' },
+            { icon: '👥', title: 'Team Collaboration', desc: 'Manage team members, assign tasks, and track project progress together seamlessly.' },
+            { icon: '✅', title: 'Task Tracking', desc: 'Create, assign, and monitor tasks with priorities, due dates, and status updates.' },
+          ].map(f => (
+            <div key={f.title} className="card" style={{textAlign:'center',padding:'2rem'}}>
+              <div style={{fontSize:'2.5rem',marginBottom:'1rem'}}>{f.icon}</div>
+              <h3 style={{fontSize:'1.1rem',fontWeight:700,color:'#f1f5f9',marginBottom:'0.5rem'}}>{f.title}</h3>
+              <p style={{color:'#64748b',fontSize:'0.875rem',lineHeight:1.6}}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
 
-          <div className="bg-white rounded-lg shadow p-8">
-            <div className="text-3xl mb-4">👥</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Team Collaboration</h3>
-            <p className="text-gray-600">Manage team members, assign tasks, and track project progress together.</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-8">
-            <div className="text-3xl mb-4">✓</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Task Tracking</h3>
-            <p className="text-gray-600">Create, assign, and monitor tasks with priorities and due dates.</p>
-          </div>
+        {/* CTA */}
+        <div className="card" style={{background:'linear-gradient(135deg,rgba(99,102,241,0.2),rgba(139,92,246,0.2))',borderColor:'rgba(99,102,241,0.4)',textAlign:'center',padding:'3rem'}}>
+          <h2 style={{fontSize:'1.75rem',fontWeight:800,color:'#f1f5f9',marginBottom:'0.75rem'}}>Ready to streamline your workflow?</h2>
+          <p style={{color:'#94a3b8',marginBottom:'1.5rem',maxWidth:'500px',margin:'0 auto 1.5rem'}}>
+            Join teams using TaskFlow to manage projects more effectively.
+          </p>
+          <button className="btn-primary" style={{padding:'0.85rem 2.5rem',fontSize:'1rem'}} onClick={() => navigate('/signup')}>
+            Get Started Today
+          </button>
         </div>
       </div>
     </div>

@@ -5,39 +5,21 @@ export default function Navbar() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
-  };
+  const logout = () => { localStorage.clear(); navigate('/login'); };
 
   return (
-    <nav className="bg-white shadow">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="text-2xl font-bold text-blue-600 hover:text-blue-700"
-            >
-              Task Manager
-            </button>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">{user.name}</span>
-            <button
-              onClick={() => navigate('/profile')}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
-            >
-              Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
-            >
-              Logout
-            </button>
-          </div>
+    <nav className="navbar">
+      <div className="navbar-brand" onClick={() => navigate('/dashboard')} style={{cursor:'pointer'}}>
+        ⚡ TaskFlow
+      </div>
+      <div className="navbar-links">
+        <button className="nav-link" onClick={() => navigate('/dashboard')}>Dashboard</button>
+        {user.role === 'admin' && (
+          <button className="nav-link" onClick={() => navigate('/admin')}>Admin Panel</button>
+        )}
+        <button className="nav-link" onClick={() => navigate('/profile')}>Profile</button>
+        <div className="nav-avatar" onClick={logout} title="Logout">
+          {user.name?.charAt(0)?.toUpperCase() || '?'}
         </div>
       </div>
     </nav>

@@ -1,140 +1,143 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
 import Navbar from '../components/Navbar';
+import { userAPI } from '../utils/api';
 
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
-  const [formData, setFormData] = useState({
-    name: user.name || '',
-  });
+  const [activeTab, setActiveTab] = useState('profile');
+  const [name, setName] = useState(user.name || '');
   const [isEditing, setIsEditing] = useState(false);
+  const [pwForm, setPwForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const showMsg = (msg, isErr = false) => {
+    if (isErr) { setError(msg); setSuccess(''); }
+    else { setSuccess(msg); setError(''); }
+    setTimeout(() => { setError(''); setSuccess(''); }, 4000);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    if (!name.trim() || name.trim().length < 2) { setError('Name must be at least 2 characters'); return; }
     setLoading(true);
-
     try {
-      const response = await api.put(`/api/users/${user.id}`, formData);
-      const updatedUser = response.data;
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setSuccess('Profile updated successfully!');
+      const res = await userAPI.updateProfile({ name: name.trim() });
+      const updated = { ...user, name: res.data.data?.name || name.trim() };
+      setUser(updated);
+      localStorage.setItem('user', JSON.stringify(updated));
       setIsEditing(false);
+      showMsg('✅ Profile updated successfully!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error updating profile');
-    } finally {
-      setLoading(false);
-    }
+      showMsg(err.response?.data?.message || 'Failed to update profile', true);
+    } finally { setLoading(false); }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!pwForm.old_password) { showMsg('Current password is required', true); return; }
+    if (!pwForm.new_password || pwForm.new_password.length < 8) { showMsg('New password must be at least 8 characters', true); return; }
+    if (pwForm.new_password !== pwForm.confirm_password) { showMsg('Passwords do not match', true); return; }
+    setLoading(true);
+    try {
+      await userAPI.updatePassword({ old_password: pwForm.old_password, new_password: pwForm.new_password, confirm_password: pwForm.confirm_password });
+      setPwForm({ old_password: '', new_password: '', confirm_password: '' });
+      showMsg('✅ Password changed successfully!');
+      setActiveTab('profile');
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'Failed to change password', true);
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page">
       <Navbar />
-      <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-            <p className="text-gray-600 text-sm mt-1">Manage your account information</p>
+      <div className="container" style={{maxWidth:'700px'}}>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">⚙️ Profile Settings</h1>
+            <p className="page-subtitle">Manage your account information and security</p>
           </div>
+          <button className="btn-secondary btn-sm" onClick={() => navigate('/dashboard')}>← Back</button>
+        </div>
 
-          <div className="px-4 py-5 sm:px-6">
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 mb-4">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
-            {success && (
-              <div className="rounded-md bg-green-50 p-4 mb-4">
-                <p className="text-sm text-green-700">{success}</p>
-              </div>
-            )}
+        {error && <div className="alert alert-error">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="text-gray-900 mt-1 text-lg">{user.name}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="text-gray-900 mt-1 text-lg">{user.email}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Role</label>
-                <p className="text-gray-900 mt-1 text-lg capitalize">{user.role}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Member Since</label>
-                <p className="text-gray-900 mt-1 text-lg">{new Date(user.created_at).toLocaleDateString()}</p>
-              </div>
-
-              {isEditing && (
-                <form onSubmit={handleSubmit} className="space-y-4 border-t pt-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                      Update Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={formData.name}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-                    >
-                      {loading ? 'Saving...' : 'Save Changes'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setFormData({ name: user.name });
-                      }}
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  Edit Profile
-                </button>
-              )}
+        <div className="card" style={{marginBottom:'1.5rem'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+            <div style={{width:'64px',height:'64px',borderRadius:'50%',background:'linear-gradient(135deg,#6366f1,#8b5cf6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.75rem',fontWeight:800,color:'#fff',flexShrink:0}}>
+              {user.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <div>
+              <div style={{fontWeight:700,fontSize:'1.2rem',color:'#f1f5f9'}}>{user.name}</div>
+              <div style={{color:'#64748b',fontSize:'0.875rem'}}>{user.email}</div>
+              <span className={`badge badge-${user.role}`} style={{marginTop:'0.35rem'}}>{user.role}</span>
             </div>
           </div>
         </div>
+
+        <div className="tabs">
+          <button className={`tab-btn ${activeTab==='profile'?'active':''}`} onClick={() => setActiveTab('profile')}>👤 Profile Info</button>
+          <button className={`tab-btn ${activeTab==='password'?'active':''}`} onClick={() => setActiveTab('password')}>🔒 Change Password</button>
+        </div>
+
+        {activeTab === 'profile' && (
+          <div className="card">
+            <form onSubmit={handleSaveProfile}>
+              <div className="form-group" style={{marginBottom:'1rem'}}>
+                <label>Full Name</label>
+                {isEditing
+                  ? <input type="text" value={name} onChange={e => setName(e.target.value)} />
+                  : <div style={{padding:'0.7rem 1rem',background:'#0f172a',borderRadius:'0.6rem',color:'#f1f5f9'}}>{user.name}</div>
+                }
+              </div>
+              <div className="form-group" style={{marginBottom:'1rem'}}>
+                <label>Email <span style={{color:'#64748b',fontSize:'0.75rem'}}>(cannot be changed)</span></label>
+                <div style={{padding:'0.7rem 1rem',background:'#0f172a',borderRadius:'0.6rem',color:'#64748b'}}>{user.email}</div>
+              </div>
+              <div className="form-group" style={{marginBottom:'1.5rem'}}>
+                <label>Role <span style={{color:'#64748b',fontSize:'0.75rem'}}>(managed by admin)</span></label>
+                <div style={{padding:'0.7rem 1rem',background:'#0f172a',borderRadius:'0.6rem'}}>
+                  <span className={`badge badge-${user.role}`}>{user.role}</span>
+                </div>
+              </div>
+              {!isEditing
+                ? <button type="button" className="btn-primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
+                : <div className="flex-row">
+                    <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Saving...' : 'Save Changes'}</button>
+                    <button type="button" className="btn-secondary" onClick={() => { setIsEditing(false); setName(user.name); }}>Cancel</button>
+                  </div>
+              }
+            </form>
+          </div>
+        )}
+
+        {activeTab === 'password' && (
+          <div className="card">
+            <form onSubmit={handleChangePassword} className="auth-form" style={{gap:'1rem'}}>
+              <div className="form-group">
+                <label>Current Password</label>
+                <input type="password" placeholder="Enter current password" value={pwForm.old_password} onChange={e => setPwForm(p => ({...p, old_password: e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label>New Password <span style={{color:'#64748b',fontSize:'0.75rem'}}>(min 8 chars)</span></label>
+                <input type="password" placeholder="Enter new password" value={pwForm.new_password} onChange={e => setPwForm(p => ({...p, new_password: e.target.value}))} />
+              </div>
+              <div className="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" placeholder="Repeat new password" value={pwForm.confirm_password} onChange={e => setPwForm(p => ({...p, confirm_password: e.target.value}))} />
+              </div>
+              <div className="flex-row">
+                <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Changing...' : 'Change Password'}</button>
+                <button type="button" className="btn-secondary" onClick={() => setPwForm({ old_password:'', new_password:'', confirm_password:'' })}>Clear</button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

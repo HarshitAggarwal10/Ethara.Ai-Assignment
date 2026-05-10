@@ -7,19 +7,23 @@ from routes.projects import projects_bp
 from routes.tasks import tasks_bp
 from routes.users import users_bp
 from routes.team import team_bp
+from routes.admin import admin_bp
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
     db.init_app(app)
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True,
+         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization"])
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(projects_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(team_bp)
+    app.register_blueprint(admin_bp)
     
     with app.app_context():
         db.create_all()
