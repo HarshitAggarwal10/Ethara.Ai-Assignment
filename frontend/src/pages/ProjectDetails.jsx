@@ -30,14 +30,15 @@ export default function ProjectDetails() {
   const fetchData = async () => {
     try {
       setLoading(true); setError('');
-      const [projRes, tasksRes, usersRes] = await Promise.all([
+      const [projRes, tasksRes, usersRes, membersRes] = await Promise.all([
         api.get(`/api/projects/${projectId}`),
         api.get('/api/tasks'),
         api.get('/api/users'),
+        api.get(`/api/team/projects/${projectId}/members`)
       ]);
       const proj = projRes.data.data;
       setProject(proj);
-      setMembers(proj.members || []);
+      setMembers(membersRes.data.data || []);
       const allTasks = tasksRes.data.data || [];
       setTasks(allTasks.filter(t => t.project_id === parseInt(projectId)));
       setAllUsers(usersRes.data.data || []);
@@ -88,6 +89,17 @@ export default function ProjectDetails() {
       await api.patch(`/api/tasks/${taskId}/status`, { status: newStatus });
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
     } catch { showMsg('Failed to update task status', true); }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await api.delete(`/api/tasks/${taskId}`);
+      showMsg('✅ Task deleted successfully');
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'Failed to delete task', true);
+    }
   };
 
   const availableUsers = allUsers.filter(u =>
@@ -193,12 +205,17 @@ export default function ProjectDetails() {
                         <span>👤 {task.assigned_to}</span>
                         {task.due_date && <span> · 📅 {new Date(task.due_date).toLocaleDateString()}</span>}
                       </div>
-                      <select className="status-select" value={task.status} onChange={e => handleStatusChange(task.id, e.target.value)}>
-                        <option value="pending">Pending</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                        <option value="overdue">Overdue</option>
-                      </select>
+                      <div style={{display:'flex',gap:'0.5rem',alignItems:'center'}}>
+                        <select className="status-select" value={task.status} onChange={e => handleStatusChange(task.id, e.target.value)}>
+                          <option value="pending">Pending</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                          <option value="overdue">Overdue</option>
+                        </select>
+                        {canManage && (
+                          <button className="btn-danger btn-sm" style={{padding:'0.25rem 0.5rem',fontSize:'0.75rem'}} onClick={() => handleDeleteTask(task.id)}>🗑</button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

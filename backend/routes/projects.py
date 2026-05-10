@@ -243,6 +243,8 @@ def delete_project(user_id, project_id):
             }), 403
         
         project_name = project.name
+        # Clear many-to-many relationship to prevent Postgres ForeignKey violation
+        project.members = []
         db.session.delete(project)
         db.session.commit()
         

@@ -353,6 +353,8 @@ def delete_project(admin_id, project_id):
             return jsonify({'error': 'Project not found'}), 404
         
         project_name = project.name
+        # Clear many-to-many relationship to prevent Postgres ForeignKey violation
+        project.members = []
         db.session.delete(project)
         db.session.commit()
         
